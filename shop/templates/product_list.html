@@ -1,0 +1,28 @@
+
+
+{% block content %}
+  <h2>Product List</h2>
+  <div>
+    <h3>Categories</h3>
+    <select onchange="location = this.value;">
+      <option value="{% url 'product_list' %}">All</option>
+      {% for category in categories %}
+        <option value="{% url 'product_list_by_category' category.id %}" {% if category.id == category_id %}selected{% endif %}>
+          {{ category.nom }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+  <ul>
+    {% for product in products %}
+      <li>
+        <h3>{{ product.nom }}</h3>
+        <p>{{ product.descripcio }}</p>
+        <p>Price: {{ product.preu }}</p>
+        <p>Available quantity: {{ product.quantitat_disponible }}</p>
+      </li>
+    {% empty %}
+      <li>No products available.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

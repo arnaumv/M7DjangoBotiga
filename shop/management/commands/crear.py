@@ -2,7 +2,7 @@
 
 from django.core.management.base import BaseCommand
 from faker import Faker
-from faker_music import MusicProvider
+from faker_vehicle import VehicleProvider
 from shop.models import Categoria, Tag, Producte, Cistella, Compra, DetallCompra, User
 import random
 
@@ -12,16 +12,21 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         # Create a Faker instance
         fake = Faker()
-        fake.add_provider(MusicProvider)
+        fake.add_provider(VehicleProvider)
+
+        # Generate and insert fake data for User
+        for _ in range(10):  # Change this number to the amount of data you want to generate
+            user = User(username=fake.user_name(), email=fake.email())
+            user.save()
 
         # Generate and insert fake data for Categoria
         for _ in range(10):  # Change this number to the amount of data you want to generate
-            categoria = Categoria(nom=fake.music_genre(), descripcio=fake.text())
+            categoria = Categoria(nom=fake.vehicle_make(), descripcio=fake.text())
             categoria.save()
 
         # Generate and insert fake data for Tag
         for _ in range(10):
-            tag = Tag(nom=fake.music_subgenre())
+            tag = Tag(nom=fake.vehicle_model())
             tag.save()
 
         # Get all categories and tags
@@ -31,7 +36,7 @@ class Command(BaseCommand):
         # Generate and insert fake data for Producte
         for _ in range(10):
             producte = Producte(
-                nom=fake.music_instrument(),
+                nom=fake.vehicle_year_make_model(),
                 descripcio=fake.text(),
                 preu=fake.random_number(digits=2, fix_len=True),
                 categoria=random.choice(categories),
