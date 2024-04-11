@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cart</title>
+</head>
+<body>
+  <h2>Cesta</h2>
+  <ul id="cartList">
+    <!-- Cart items will be populated by JavaScript -->
+  </ul>
+
+  <script>
+    // Get the cart from localStorage
+    var cart = JSON.parse(localStorage.getItem('cart')) || [];
+    
+    // Get the cart list element
+    var cartList = document.getElementById('cartList');
+  
+    // Initialize total price
+    var totalPrice = 0;
+    
+    // Populate the cart list
+    cart.forEach(item => {
+      var li = document.createElement('li');
+      li.textContent = 'Producto : ' + item.name + ', Precio: ' + item.price + ', Cantidad: ' + item.quantity;
+      cartList.appendChild(li);
+  
+      // Convert item.price and item.quantity to numbers and add the price of this item to the total price
+      totalPrice += parseFloat(item.price) * parseInt(item.quantity);
+    });
+  
+    // Create a list item for the total price
+    var li = document.createElement('li');
+    li.textContent = 'Precio Total: ' + totalPrice.toFixed(2);
+    cartList.appendChild(li);
+  </script>
+</body>
+</html>

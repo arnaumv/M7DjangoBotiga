@@ -1,28 +1,138 @@
-
-
 {% block content %}
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    h2 {
+      color: #333;
+    }
+    #categorySelect {
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    #productList {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      list-style-type: none;
+      padding: 0;
+    }
+    #productList li {
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    #productList li h3 {
+      margin-top: 0;
+    }
+    .add-to-cart-button {
+      background-color: #008CBA; /* Blue */
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 10px 2px;
+      cursor: pointer;
+    }
+    .cart-button {
+      background-color: #008CBA; /* Blue */
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 10px 2px;
+      cursor: pointer;
+    }
+  </style>
+
   <h2>Product List</h2>
   <div>
     <h3>Categories</h3>
-    <select onchange="location = this.value;">
-      <option value="{% url 'product_list' %}">All</option>
-      {% for category in categories %}
-        <option value="{% url 'product_list_by_category' category.id %}" {% if category.id == category_id %}selected{% endif %}>
-          {{ category.nom }}
-        </option>
-      {% endfor %}
+    <select id="categorySelect" onchange="fetchProducts(this.value)">
+      <option value="">All</option>
+      <!-- Categories will be populated by JavaScript -->
     </select>
   </div>
-  <ul>
-    {% for product in products %}
-      <li>
-        <h3>{{ product.nom }}</h3>
-        <p>{{ product.descripcio }}</p>
-        <p>Price: {{ product.preu }}</p>
-        <p>Available quantity: {{ product.quantitat_disponible }}</p>
-      </li>
-    {% empty %}
-      <li>No products available.</li>
-    {% endfor %}
+  <ul id="productList">
+    <!-- Products will be populated by JavaScript -->
   </ul>
+
+  <a href="/cart/"><button class="cart-button">Cesta</button></a>
+
+
+  <script>
+    function fetchProducts(categoryId) {
+      var url = '/products/';
+      if (categoryId) {
+        url += categoryId + '/';
+      }
+  
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          var productList = document.getElementById('productList');
+          var categorySelect = document.getElementById('categorySelect');
+  
+          // Clear the product list and category select
+          productList.innerHTML = '';
+          categorySelect.innerHTML = '<option value="">All</option>';
+  
+          // Populate the product list
+          JSON.parse(data.products).forEach(product => {
+          var li = document.createElement('li');
+          li.innerHTML = '<h3>' + product.fields.nom + '</h3>' +
+                        '<p>' + product.fields.descripcio + '</p>' +
+                        '<p>Price: ' + product.fields.preu + '</p>' +
+                        '<p>Available quantity: ' + product.fields.quantitat_disponible + '</p>' +
+                        '<button class="add-to-cart-button" onclick="addToCart(' + product.pk + ', \'' + product.fields.nom + '\', ' + product.fields.preu + ')">Añadir a la cesta</button>';
+          productList.appendChild(li);
+        });
+  
+          // Populate the category select
+          JSON.parse(data.categories).forEach(category => {
+            var option = document.createElement('option');
+            option.value = category.pk;
+            option.text = category.fields.nom;
+            if (category.pk == data.category_id) {
+              option.selected = true;
+            }
+            categorySelect.appendChild(option);
+          });
+        });
+    }
+  
+    function addToCart(productId, productName, productPrice) {
+      // Get the current cart from localStorage
+      var cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+      // Convert productPrice to a number
+      productPrice = parseFloat(productPrice);
+
+      // Check if the product is already in the cart
+      var existingProduct = cart.find(product => product.id === productId);
+
+      if (existingProduct) {
+        // If the product is already in the cart, increment its quantity
+        existingProduct.quantity += 1;
+      } else {
+        // If the product is not in the cart, add it with a quantity of 1, the product name, and the product price
+        cart.push({ id: productId, name: productName, price: productPrice, quantity: 1 });
+      }
+
+      // Save the updated cart back to localStorage
+      localStorage.setItem('cart', JSON.stringify(cart));
+    }
+  
+    // Fetch all products when the page loads
+    fetchProducts();
+  </script>
 {% endblock %}

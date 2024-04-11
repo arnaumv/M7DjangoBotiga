@@ -9,3 +9,7 @@ def product_list(request, category_id=None):
         products = Producte.objects.all()
     categories = Categoria.objects.all()
     return render(request, 'product_list.html', {'products': products, 'categories': categories, 'category_id': category_id})
+
+def cart(request):
+    return render(request, 'cart.html')
+
